@@ -8,7 +8,7 @@ from imutils import contours
 import numpy as np
 import argparse
 import imutils
-from continuous_cartesian import go_to_relative, go_to_absalute
+from continuous_cartesian import go_to_relative
 from measure_width_utils import get_width_image, get_width, get_max_width, get_total_width
 from hlpr_manipulation_utils.arm_moveit2 import ArmMoveIt
 from hlpr_manipulation_utils.manipulator import Gripper
@@ -23,7 +23,7 @@ def midpoint(ptA, ptB):
 
 def go_to_start(arm, pose=None, start=False):
     if start is True:
-        os.system('rosservice call /j2s7s300_driver/in/home_arm ')
+        os.system('rosservice call /j2s7s300_driver/in/home_arm')
     if pose is None:
         target = Pose()
         target.position.x = .52067
@@ -124,14 +124,16 @@ class BalanceToy():
         else:
             self.observation_space = [9]
 
-        #self.grip.open()
-
-        go_to_start(self.arm, self.reset_pose, start=False)
+        self.arm.move_to_joint_pose([1.320531, 2.054955, -0.168523, 4.035109, 3.233114, 4.227190, 4.636301])
+        time.sleep(1)
+        self.grip.open()
+        self.grip.close()
+        #go_to_start(self.arm, self.reset_pose, start=False)
         
-        """self.grip.open()
+        self.grip.open()
         print("Please place toy in upright position in gripper. Gripper will close in 5 seconds. WATCH FINGERS")
         time.sleep(5)
-        self.grip.close(block=False)"""
+        self.grip.close(block=False)
 
         self.cur_time = time.time()
         self.total_time = time.time()
@@ -184,33 +186,33 @@ class BalanceToy():
         action = np.array(action)*self.max_action_true
         print(action)
         global cur_pos
-        for i in range(len(action)):
-            if i == 1:
-                if cur_pos[i] <= -50.0:
-                    cur_pos[i] = -50.0
-                    if action[i] < 0:
-                        action[i] = 0.0
-                    else:
-                        action = min(action[i], 60)
-                if cur_pos[i] >= 50.0:
-                    cur_pos[i] = 50.0
-                    if action[i]>0:
-                        action[i] = 0.0
-                    else:
-                        action[i] = max(action[i], -60)
-            else:
-                if cur_pos[i] <= -70.0:
-                    cur_pos[i] = -70.0
-                    if action[i] < 0:
-                        action[i] = 0.0
-                    else:
-                        action = min(action[i], 70)
-                if cur_pos[i] >= 70.0:
-                    cur_pos[i] = 70.0
-                    if action[i]>0:
-                        action[i] = 0.0
-                    else:
-                        action[i] = max(action[i], -70)
+        # for i in range(len(action)):
+        #     if i == 1:
+        #         if cur_pos[i] <= -50.0:
+        #             cur_pos[i] = -50.0
+        #             if action[i] < 0:
+        #                 action[i] = 0.0
+        #             else:
+        #                 action = min(action[i], 60)
+        #         if cur_pos[i] >= 50.0:
+        #             cur_pos[i] = 50.0
+        #             if action[i]>0:
+        #                 action[i] = 0.0
+        #             else:
+        #                 action[i] = max(action[i], -60)
+        #     else:
+        #         if cur_pos[i] <= -70.0:
+        #             cur_pos[i] = -70.0
+        #             if action[i] < 0:
+        #                 action[i] = 0.0
+        #             else:
+        #                 action = min(action[i], 70)
+        #         if cur_pos[i] >= 70.0:
+        #             cur_pos[i] = 70.0
+        #             if action[i]>0:
+        #                 action[i] = 0.0
+        #             else:
+        #                 action[i] = max(action[i], -70)
 
         for i in range(len(action)):
             if action[i] > 1 or action[i] < -1:
@@ -220,7 +222,7 @@ class BalanceToy():
         action = [0.0,0.0,0.0, action[0], action[1], action[2]]
 
         print(action, "ACTION")
-        print(cur_pos, "CURENT POSE")
+        #print(cur_pos, "CURENT POSE")
 
         if time.time() - self.cur_time <= self.episode_time:
             if not np.array_equal(action, np.zeros_like(action)):
